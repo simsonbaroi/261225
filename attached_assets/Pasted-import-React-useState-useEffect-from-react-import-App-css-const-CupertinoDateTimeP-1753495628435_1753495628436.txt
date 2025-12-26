@@ -1,0 +1,477 @@
+import React, { useState, useEffect } from 'react';
+import './App.css';
+
+const CupertinoDateTimePicker = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(true);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  
+  // Days of the week
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  // Months
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  // Time options
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutes = Array.from({ length: 60 }, (_, i) => i < 10 ? `0${i}` : `${i}`);
+  const periods = ['AM', 'PM'];
+  
+  // Generate date options for the next 7 days
+  const generateDateOptions = () => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      return {
+        date,
+        day: days[date.getDay()],
+        month: months[date.getMonth()],
+        dateNum: date.getDate(),
+        year: date.getFullYear(),
+        isToday: i === 0
+      };
+    });
+  };
+  
+  const dateOptions = generateDateOptions();
+  
+  // Time slots
+  const timeSlots = [
+    { hour: 10, minute: 30, period: 'AM' },
+    { hour: 11, minute: 31, period: 'AM' },
+    { hour: 12, minute: 32, period: 'PM' },
+    { hour: 1, minute: 33, period: 'PM' },
+    { hour: 2, minute: 34, period: 'PM' },
+    { hour: 3, minute: 35, period: 'PM' },
+    { hour: 4, minute: 36, period: 'PM' }
+  ];
+  
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setShowDatePicker(false);
+    setShowTimePicker(true);
+  };
+  
+  const handleTimeSelect = (time) => {
+    const newDate = new Date(selectedDate);
+    newDate.setHours(time.period === 'PM' ? time.hour + 12 : time.hour);
+    newDate.setMinutes(time.minute);
+    setSelectedDate(newDate);
+    setShowTimePicker(false);
+  };
+  
+  const handleCancel = () => {
+    setShowDatePicker(true);
+    setShowTimePicker(false);
+  };
+  
+  const handleConfirm = () => {
+    alert(`Selected Date: ${selectedDate.toLocaleString()}`);
+    setShowDatePicker(true);
+    setShowTimePicker(false);
+  };
+  
+  const formatDate = (date) => {
+    return `${days[date.getDay()]} ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
+  
+  return (
+    <div className="cupertino-container">
+      <div className="cupertino-picker">
+        <div className="picker-header">
+          <h2>Select Date & Time</h2>
+          <div className="selected-date">{formatDate(selectedDate)}</div>
+        </div>
+        
+        {showDatePicker && (
+          <div className="date-picker">
+            <div className="date-options">
+              {dateOptions.map((option, index) => (
+                <div 
+                  key={index} 
+                  className={`date-option ${selectedDate.getDate() === option.dateNum ? 'selected' : ''}`}
+                  onClick={() => handleDateSelect(option.date)}
+                >
+                  <div className="date-info">
+                    <span className="day">{option.day}</span>
+                    <span className="month">{option.month}</span>
+                    <span className="date-num">{option.dateNum}</span>
+                  </div>
+                  <div className="year">{option.year}</div>
+                  {option.isToday && <div className="today-label">Today</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {showTimePicker && (
+          <div className="time-picker">
+            <div className="time-slots">
+              {timeSlots.map((time, index) => (
+                <div 
+                  key={index} 
+                  className="time-slot"
+                  onClick={() => handleTimeSelect(time)}
+                >
+                  <div className="time-display">
+                    <span className="hour">{time.hour}</span>
+                    <span className="minute">{time.minute}</span>
+                    <span className="period">{time.period}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="time-wheel">
+              <div className="wheel-column">
+                {hours.map((hour) => (
+                  <div 
+                    key={hour} 
+                    className={`wheel-item ${selectedDate.getHours() % 12 === hour % 12 ? 'selected' : ''}`}
+                  >
+                    {hour}
+                  </div>
+                ))}
+              </div>
+              <div className="wheel-column">
+                {minutes.map((minute) => (
+                  <div 
+                    key={minute} 
+                    className={`wheel-item ${selectedDate.getMinutes() === parseInt(minute) ? 'selected' : ''}`}
+                  >
+                    {minute}
+                  </div>
+                ))}
+              </div>
+              <div className="wheel-column">
+                {periods.map((period) => (
+                  <div 
+                    key={period} 
+                    className={`wheel-item ${selectedDate.getHours() >= 12 ? period === 'PM' : period === 'AM'} ? 'selected' : ''}`}
+                  >
+                    {period}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="picker-footer">
+          <button className="cancel-btn" onClick={handleCancel}>Cancel</button>
+          <button className="confirm-btn" onClick={handleConfirm}>OK</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <div className="app">
+      <h1>Cupertino-style Date & Time Picker</h1>
+      <CupertinoDateTimePicker />
+    </div>
+  );
+}
+
+export default App;
+css
+/* App.css */
+:root {
+  --primary-color: #007AFF;
+  --primary-light: rgba(0, 122, 255, 0.1);
+  --gray-light: #f5f5f7;
+  --gray-medium: #e5e5ea;
+  --gray-dark: #8e8e93;
+  --text-dark: #1d1d1f;
+  --text-light: #86868b;
+  --border-radius: 12px;
+  --shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+  background-color: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  color: var(--text-dark);
+}
+
+.app {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.app h1 {
+  margin-bottom: 30px;
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.cupertino-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.cupertino-picker {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  width: 100%;
+  max-width: 400px;
+}
+
+.picker-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--gray-medium);
+  position: relative;
+}
+
+.picker-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.selected-date {
+  font-size: 15px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.date-picker, .time-picker {
+  padding: 16px;
+}
+
+.date-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  border: 1px solid var(--gray-medium);
+}
+
+.date-option:hover {
+  background-color: var(--gray-light);
+}
+
+.date-option.selected {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.day {
+  font-weight: 500;
+  width: 32px;
+}
+
+.month {
+  color: var(--text-light);
+  width: 30px;
+}
+
+.date-num {
+  font-size: 20px;
+  font-weight: 500;
+  width: 26px;
+}
+
+.year {
+  color: var(--text-light);
+  font-size: 15px;
+}
+
+.today-label {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.time-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.time-slot {
+  padding: 14px;
+  border: 1px solid var(--gray-medium);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.time-slot:hover {
+  background-color: var(--gray-light);
+}
+
+.time-display {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.hour, .minute, .period {
+  padding: 0 4px;
+}
+
+.time-wheel {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  height: 180px;
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--border-radius);
+  background-color: var(--gray-light);
+  padding: 20px 0;
+}
+
+.time-wheel::before, .time-wheel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.time-wheel::before {
+  top: 0;
+  background: linear-gradient(to bottom, white, rgba(255, 255, 255, 0.8));
+}
+
+.time-wheel::after {
+  bottom: 0;
+  background: linear-gradient(to top, white, rgba(255, 255, 255, 0.8));
+}
+
+.wheel-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  width: 60px;
+  padding: 60px 0;
+  scrollbar-width: none;
+}
+
+.wheel-column::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  width: 100%;
+  font-size: 20px;
+  color: var(--text-light);
+}
+
+.wheel-item.selected {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.picker-footer {
+  display: flex;
+  padding: 16px;
+  border-top: 1px solid var(--gray-medium);
+  gap: 10px;
+}
+
+.cancel-btn, .confirm-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  color: var(--primary-color);
+}
+
+.cancel-btn:hover {
+  background-color: var(--gray-light);
+}
+
+.confirm-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.confirm-btn:hover {
+  background-color: #0062cc;
+}
+
+@media (max-width: 480px) {
+  .time-slots {
+    grid-template-columns: 1fr;
+  }
+  
+  .time-wheel {
+    gap: 10px;
+  }
+  
+  .wheel-column {
+    width: 50px;
+  }
+}
